@@ -1,3 +1,5 @@
+import { useState, useEffect} from "react";
+import axios from 'axios';
 
 const styles = {
     container: {
@@ -22,6 +24,36 @@ const styles = {
 
 
 export const Transactions = ({  }) => {
+    const [atms, setAtms] = useState([])
+    const [aids, setAids] = useState([])
+    const apiUrl = import.meta.env.VITE_API_URL;
+
+    const fetchATMS = async () => {
+        try {
+            const {data} = await axios.get(`${apiUrl}/getAtmList`)
+            setAtms(data)
+            console.log(data);
+        } catch (error) {
+            console.log("Error fetching ATMS: " + error)
+        }
+    }
+
+    const fetchAids = async () => {
+        try {
+            const {data} = await axios.get(`${apiUrl}/getAidList`)
+            setAids(data)
+            console.log(data);
+        } catch (error) {
+            console.log("Error fetching Aids: " + error)
+        }
+    }
+
+    useEffect(() => {
+      fetchATMS();
+      fetchAids();
+    
+    }, [])
+    
     return (
         
             <div style={styles.container}>
@@ -50,6 +82,9 @@ export const Transactions = ({  }) => {
                         <label>ATM ID</label>
                         <select>
                                 <option>All ATMS</option>
+                                {atms.map((item, index) => (
+                                    <option key={index}>{item.name}</option>
+                                ))}
                         </select>
                     </div>
 
@@ -63,9 +98,10 @@ export const Transactions = ({  }) => {
                     <div style={styles.field}>
                         <label>EMV Chip AID</label>
                         <select>
-                            <option>All applications</option>
-                            <option>AID1</option>
-                            <option>AID2</option>
+                        <option>All Applications</option>
+                            {aids.map((item, index) => (
+                                <option key={index}>{item.aid}</option>
+                            ))}
                         </select>
                     </div>
 
