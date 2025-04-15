@@ -34,12 +34,17 @@ app.get("/getHostResponseList", async (req, res) => {
     res.send(data)
 })
 
-// app.get("/getTransactionLog", async (req, res) => {
-//     const response = await fetch(
-//         `https://dev.smartjournal.net:443/um/test/api/jr/txn/log/v1`);
-//     const data = await response.json()
-//     res.send(data)
-// })
+app.get("/getTransactionLog/:atmid/:devtime", async (req, res) => {
+    const atmid = req.params.atmid
+    const devtime = req.params.devtime
+    console.log("hereeee");
+    const response = await fetch(
+        `https://dev.smartjournal.net:443/um/test/api/jr/txn/log/v1?a=${atmid}&t=${devtime}`);
+    
+    const data =   await response.text()
+    
+    res.send(data)
+})
 
 app.get("/getTransactionTypeList", async (req, res) => {
     const response = await fetch(
@@ -48,12 +53,14 @@ app.get("/getTransactionTypeList", async (req, res) => {
     res.send(data)
 })
 
-// app.get("/getAtmPastFutureTransactions", async (req, res) => {
-//     const response = await fetch(
-//         `https://dev.smartjournal.net:443/um/test/api/jr/txn/txnlist/v1`);
-//     const data = await response.json()
-//     res.send(data)
-// })
+app.get("/getAtmPastFutureTransactions/:atmid/:datetime", async (req, res) => {
+    const atmid = req.params.atmid
+    const datetime = req.params.datetime
+    const response = await fetch(
+        `https://dev.smartjournal.net:443/um/test/api/jr/txn/txnlist/${atmid}/${datetime}/v1`);
+    const data = await response.json()
+    res.send(data)
+})
 
 app.listen(port, () => {
     console.log("server started on port 8080")

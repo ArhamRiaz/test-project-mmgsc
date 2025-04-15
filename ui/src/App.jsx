@@ -9,7 +9,7 @@ import { ATMManagement } from './components/ATMManagement';
 
 
 function App() {
-  document.body.style.backgroundColor = "light grey";
+  document.body.style.backgroundColor = "#FAF9F7";
   
 
   return (
