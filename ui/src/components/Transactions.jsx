@@ -1,7 +1,9 @@
 import { useState, useEffect} from "react";
-import { parseLogs } from "./TransactionsHelpers";
-import Divider from '@mui/material/Divider';
+import { parseLogs, getDatesInRange } from "./TransactionsHelpers";
 import axios from 'axios';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+
 
 const styles = {
     container: {
@@ -14,6 +16,7 @@ const styles = {
       display: "flex",
       flexDirection: "column",
       minWidth: "200px",
+      
     },
     rowy: {
         display: "flex",
@@ -26,16 +29,23 @@ const styles = {
 
 
 export const Transactions = ({  }) => {
+    
     const [atms, setAtms] = useState([])
     const [aids, setAids] = useState([])
     const [transactions, setTransactions] = useState([]);
+    const [serialPlace, setSerialPlace] = useState('4 digit number')
+    const [panPlace, setPanPlace] = useState('Partial or full card number')
     const [filters, setFilters] = useState({
-        date: '',
-        atmId: '',
+        startDate: '',
+        endDate: '',
+        atmId: 'All ATMS',
         pan: '',
         aid: '',
         serial:''
     })
+    const [startDate, setStartDate] = useState(null);
+    const [endDate, setEndDate] = useState(null);
+
     const apiUrl = import.meta.env.VITE_API_URL;
 
     const fetchATMS = async () => {
@@ -86,26 +96,44 @@ export const Transactions = ({  }) => {
         try {
             
             const params = {
-                datetime: filters.date ? new Date(filters.date).getTime() : '',
+                startDate: filters.startDate ? new Date(filters.startDate).getTime() : '',
+                endDate: filters.endDate ? new Date(filters.endDate).getTime() : '',
                 atmId: filters.atmId || '',
                 pan: filters.pan || '',
                 aid: filters.aid || '',
                 serial: filters.serialNumber || ''
             };
             
-            const  data  = await axios.get(`${apiUrl}/getAtmPastFutureTransactions/${params.atmId}/${params.datetime}`);
+            if (params.startDate != '' & params.atmId != '' & params.endDate != ''){
 
-            for (let i = 0; i <data.data.txn.length; i++){
-                const d2 = await fetchLogs(params.atmId, (data.data.txn)[i].devTime)
-                //console.log(d2)
-                data.data.txn[i].description =d2
-                console.log(parseLogs(d2));
+                const dateRange = getDatesInRange(params.startDate, params.endDate);
+                
+                if (params.atmId == "All ATMS"){
+                    
+                }
+                const datePromises = dateRange.map(date => 
+                    axios.get(`${apiUrl}/getAtmPastFutureTransactions/${params.atmId}/${date}`)
+                  );
+                  
+                  const dateResponses = await Promise.all(datePromises);
+                  
+                  const transactionsWithLogs = await Promise.all(
+                    dateResponses.flatMap(response => 
+                      response.data.txn.map(async transaction => {
+                        const logs = await fetchLogs(params.atmId, transaction.devTime);
+                        return {
+                          ...transaction,
+                          description: logs,
+                          date: new Date(transaction.devTime).toLocaleDateString()
+                        };
+                      })
+                    )
+                  );
+                  
+                  setTransactions(transactionsWithLogs);
             }
-            //const d2 = await fetchLogs(params.atmId, (data.txn)[0].devtime)
-            
-            setTransactions(data.data.txn);
-            console.log(data.data.txn[0])
         } catch (error) {
+
             console.log("Error fetching transactions: " + error);
         }
     };
@@ -136,34 +164,52 @@ export const Transactions = ({  }) => {
             <div style={styles.container}>
 
               {/* Headers */}
-              <div  className="flex items- p-6 overflow-auto ml-64">
-                <div style={styles.rowy} className="flex justify-between items-center mb-4 w-full" >
-                  <h4 className="text-2xl font-bold">All Transactions</h4>
-                  <div className="flex space-x-20">
-                    <button className="bg-gray-200 text-right px-4 py-1 rounded">Print</button>
-                    <button className="bg-blue-600 text-right text-white px-4 py-1 rounded">Export</button>
+              <div  >
+                <div style={styles.rowy}  >
+                  <h4 >All Transactions</h4>
+                  <div >
+                    <button >Print</button>
+                    <button >Export</button>
                   </div>
                 </div>
         
-                {/* Filter section */}
-                {/* I think I may make these into separate components in the future, I'll see how I'm going to send requests to the backend*/}
                 <div style={styles.container}>
                     {/* Date  */}
-                    <div className="flex items-center gap-2">
-                        <p className="whitespace-nowrap">Date</p>
-                        <input 
+                    <div >
+                        <p className=" text-left">Date</p>
+                        <DatePicker
+                            selectsRange={true}
+                            startDate={startDate}
+                            endDate={endDate}
+                            onChange={(dates) => {
+                                const [start, end] = dates;
+                                setStartDate(start);
+                                setEndDate(end);
+                                setFilters(prev => ({
+                                ...prev,
+                                startDate: start ? start.toISOString() : '',
+                                endDate: end ? end.toISOString() : ''
+                                }));
+                            }}
+                            isClearable={true}
+                            placeholderText="Select date range"
+                            className="bg-white shadow-md rounded px-4 py-3 mb-4 w-64 h-12 hover:bg-gray-50 transition-colors duration-200"
+                            />  
+                        {/* <input 
                             type="date" 
-                            className="border p-2 rounded" 
-                            name="date"
-                            value={filters.date}
+                            className="bg-white shadow-md rounded px-4 py-3 mb-4 w-52 h-12
+                                       hover:bg-gray-50 transition-colors duration-200" 
+                            name="startDate"
+                            value={filters.startDate}
                             onChange={handleFilterChange}
-                        />
+                        /> */}
                     </div>
 
                     {/* ATM ID Dropdown */}
                     <div style={styles.field}>
-                        <label>ATM ID</label>
-                        <select 
+                        <label className=" text-left">ATM ID</label>
+                        <select className="bg-white shadow-md rounded px-4 py-3 mb-4 w-52 h-12
+                                           hover:bg-gray-50 transition-colors duration-200"
                             name="atmId"
                             value={filters.atmId}
                             onChange={handleFilterChange}
@@ -179,9 +225,12 @@ export const Transactions = ({  }) => {
 
                     {/* Customer PAN Number */}
                     <div style={styles.field}>
-                        <label>Customer PAN Number</label>
-                        <input 
-                            placeholder="Partial or full card number" 
+                        <label className=" text-left">Customer PAN Number</label>
+                        <input className="bg-white shadow-md rounded text-center px-4 py-3 mb-4 w-52 h-12
+                                          hover:bg-gray-50 transition-colors duration-200"
+                            placeholder={panPlace}
+                            onFocus={() => setPanPlace('')}
+                            onBlur={() => setPanPlace('Partial or full card number')}
                             name="pan"
                             value={filters.pan}
                             onChange={handleFilterChange}
@@ -190,8 +239,9 @@ export const Transactions = ({  }) => {
 
                     {/* EMV Chip AID Dropdown */}
                     <div style={styles.field}>
-                        <label>EMV Chip AID</label>
-                        <select 
+                        <label className=" text-left">EMV Chip AID</label>
+                        <select className="bg-white shadow-md rounded px-4 py-3 mb-4 w-52 h-12
+                                           hover:bg-gray-50 transition-colors duration-200"
                             name="aid"
                             value={filters.aid}
                             onChange={handleFilterChange}
@@ -207,9 +257,12 @@ export const Transactions = ({  }) => {
 
                     {/* Transaction Serial Number */}
                     <div style={styles.field}>
-                        <label>Transaction Serial Number</label>
-                        <input 
-                            placeholder="4 digit number" 
+                        <label className=" text-left">Transaction Serial Number</label>
+                        <input className="bg-white shadow-md rounded text-center px-4 py-3 mb-4 w-52 h-12
+                                          hover:bg-gray-50 transition-colors duration-200"
+                            placeholder={serialPlace}
+                            onFocus={() => setSerialPlace('')}
+                            onBlur={() => setSerialPlace('4 digit number')}
                             maxLength={4} 
                             name="serialNumber"
                             value={filters.serialNumber}
@@ -234,17 +287,17 @@ export const Transactions = ({  }) => {
                         </tr>
                         
                     </thead>
-                    <tr ></tr>
+                    
                     <tbody>
-                        {transactions.map((txn) => (
-                        <tr key={txn.id} className="hover:bg-gray-50">
-                            <td className="px-4 py-2 border-b">{txn.date}</td>
-                            <td className="px-4 py-2 border-b">{txn.atm?.txt}</td>
-                            <td className="px-4 py-2 border-b">{txn.pan}</td>
-                            <td className="px-4 py-2 border-b">{txn.description}</td>
-                            <td className="px-4 py-2 border-b">{txn.code}</td>
+                    {transactions.map((txn, index) => (
+                        <tr key={`${txn.devTime}-${index}`} className="hover:bg-gray-50">
+                        <td className="px-4 py-2 border-b">{txn.date}</td>
+                        <td className="px-4 py-2 border-b">{txn.atm?.txt || 'N/A'}</td>
+                        <td className="px-4 py-2 border-b">{txn.pan || 'N/A'}</td>
+                        <td className="px-4 py-2 border-b">{txn.description || 'N/A'}</td>
+                        <td className="px-4 py-2 border-b">{txn.code || 'N/A'}</td>
                         </tr>
-                        ))}
+                    ))}
                     </tbody>
                     </table>
                 </div>

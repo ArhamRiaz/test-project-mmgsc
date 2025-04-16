@@ -46,3 +46,22 @@ export const parseLogs = (logs) => {
     
     return transactions;
   };
+
+  export const getDatesInRange = (startDate, endDate) => {
+    if (!startDate || !endDate) return [];
+    
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    if (start > end) return [];
+    
+    const dates = [];
+    let currentDate = new Date(start);
+    
+    while (currentDate <= end) {
+      dates.push(new Date(currentDate).getTime());
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    return dates;
+  };
