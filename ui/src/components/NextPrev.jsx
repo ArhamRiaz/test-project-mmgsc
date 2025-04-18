@@ -25,7 +25,7 @@ export const NextPrev = ({itemsPerPage, currentPage, totalPages, transactions, s
                 <button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="px-3 py-1 border rounded disabled:opacity-50"
+                className="!bg-gray-300 !hover:bg-gray-400 !text-gray-800 !font-bold !py-2 !px-4"
                 >
                 Previous
                 </button>
@@ -46,8 +46,8 @@ export const NextPrev = ({itemsPerPage, currentPage, totalPages, transactions, s
                     <button
                     key={pageNum}
                     onClick={() => paginate(pageNum)}
-                    className={`px-3 py-1 border rounded ${
-                        currentPage === pageNum ? "bg-blue-500 text-white" : ""
+                    className={`!px-5 !py-3  !border-none ${
+                        currentPage === pageNum ? "!bg-gray-500 !text-white" : ""
                     }`}
                     >
                     {pageNum}
@@ -58,7 +58,7 @@ export const NextPrev = ({itemsPerPage, currentPage, totalPages, transactions, s
                 <button
                 onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className="px-3 py-1 border rounded disabled:opacity-50"
+                className="!bg-gray-300 !hover:bg-gray-400 !text-gray-800 !font-bold !py-2 !px-4"
                 >
                 Next
                 </button>
