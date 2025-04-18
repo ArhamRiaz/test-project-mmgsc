@@ -1,10 +1,11 @@
 import { useState, useEffect} from "react";
-import { parseLogs, getDatesInRange, getAtmTransacs } from "./TransactionsHelpers";
+import { parseLogs, getDatesInRange, getAtmTransacs } from "./helpers/TransactionsHelpers";
 import axios from 'axios';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { IoIosSearch } from "react-icons/io";
 import CircularProgress from '@mui/material/CircularProgress';
+import { NextPrev } from "./NextPrev";
 
 
 const styles = {
@@ -50,7 +51,16 @@ export const Transactions = ({  }) => {
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(15);
 
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentTransactions = transactions.slice(indexOfFirstItem, indexOfLastItem);
+
+    const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+    const totalPages = Math.ceil(transactions.length / itemsPerPage);
     const apiUrl = import.meta.env.VITE_API_URL;
 
     const fetchATMS = async () => {
@@ -86,6 +96,7 @@ export const Transactions = ({  }) => {
             };
             
             if (params.startDate != '' & params.atmId != '' & params.endDate != ''){
+                setCurrentPage(1)
 
                 const dateRange = getDatesInRange(params.startDate, params.endDate);
                 
@@ -324,7 +335,7 @@ export const Transactions = ({  }) => {
                               </tr>
                             </tbody>
                         ) : (<tbody>
-                            {transactions.map((txn, index) => (
+                            {currentTransactions.map((txn, index) => (
                                 <tr key={`${txn.devTime}-${index}`} className="hover:bg-gray-50">
                                 <td className="px-4 py-2 border-b text-left">{txn.date}</td>
                                 <td className="px-4 py-2 border-b text-left ">{txn.atm?.txt || 'N/A'}</td>
@@ -334,9 +345,10 @@ export const Transactions = ({  }) => {
                                 </tr>
                             ))}</tbody>
                         )}
+                        
 
                     
-                    </table>
+                    </table><NextPrev itemsPerPage={itemsPerPage} currentPage={currentPage} totalPages={totalPages} indexOfFirstItem={indexOfFirstItem} indexOfLastItem={indexOfLastItem} transactions={transactions} setCurrentPage={setCurrentPage} setItemsPerPage={setItemsPerPage} paginate={paginate}/>
                 </div>
               </div>
             </div>

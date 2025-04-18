@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { SidebarData } from "./SidebarData";
+import { SidebarData } from "./helpers/SideBarData";
+import { GrTransaction } from "react-icons/gr";
+import { IoMdSettings } from "react-icons/io";
 import "../App.css";
 
 
@@ -9,8 +11,7 @@ export const SideBar = ({ children }) => {
   const [settings, setSettings] = useState(false)
   const location = useLocation();
 
-  const showSidebar = () => setSidebar(!sidebar);
-  const showSettings = () => setSettings(!settings);
+    const showSettings = () => setSettings(!settings);
   
   const isActive = (path) => location.pathname === path;
   return (
@@ -19,22 +20,25 @@ export const SideBar = ({ children }) => {
         <nav className={sidebar ? "nav-menu active" : "nav-menu"}>
 
           <ul className="nav-menu-items" >
-                <li  className={`nav-text ${isActive("/transactions") ? "active" : ""}`} >
-                  <Link to="/transactions">
-                    <p className="font-bold">{"Transactions"}</p>
-                  </Link>
-                </li>
+          <li className={`nav-text ${isActive("/transactions") ? "active" : ""}`}>
+                <Link to="/transactions" className="flex items-center gap-2">
+                    <GrTransaction className="inline-block align-middle" />
+                <span className="font-bold inline-block align-middle">Transactions</span>
+                </Link>
+           </li>
 
-                <li className={"nav-text"} onClick={showSettings}>
-                    <div>
-                        <p className="font-bold">{"Settings"}</p>
-                    </div>
-                </li>
+            <li className="nav-text" onClick={showSettings}>
+                <div className="flex items-center gap-2 cursor-pointer">
+                    <IoMdSettings className="inline-block align-middle" />
+                <span className="font-bold inline-block align-middle">Settings</span>
+                </div>
+            </li>
 
                 {settings && SidebarData.map((item) => {
                     return (
                         <li key={item.path} className={`nav-text-2 ${isActive(item.path) ? "active" : ""}`}>
-                        <Link to={item.path}>
+                        <Link to={item.path} className="flex items-center gap-2">
+                          
                             <span>{item.title}</span>
                         </Link>
                         </li>
@@ -47,10 +51,10 @@ export const SideBar = ({ children }) => {
         <div 
             className="main-content" 
             style={{
-            marginLeft: sidebar ? '250px' : '0', // Match sidebar width
+            marginLeft: sidebar ? '250px' : '0', 
             width: sidebar ? 'calc(100% - 250px)' : '100%',
             padding: '1rem',
-            transition: 'margin-left 0.45s ease' // Match sidebar transition
+            transition: 'margin-left 0.45s ease' 
             }}
         >
             {children}

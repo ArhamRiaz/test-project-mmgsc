@@ -62,6 +62,19 @@ app.get("/getAtmPastFutureTransactions/:atmid/:datetime", async (req, res) => {
     res.send(data)
 })
 
+app.post('/getTransactionListWithPost', async (req, res) => {
+    try{
+
+        const response = await fetch(
+            `https://dev.smartjournal.net:443/um/test/api/jr/txn/v1`);
+        const data = await response.json()
+
+        res.send(data)
+      } catch(err){
+        res.status(400).send(`Error creating album: ${err}`)
+      }
+    });
+
 app.listen(port, () => {
     console.log("server started on port 8080")
 })
