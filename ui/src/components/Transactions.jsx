@@ -180,7 +180,7 @@ export const Transactions = ({  }) => {
     useEffect(() => {
       fetchTransactions();
       
-    }, [filters])
+    }, [filters.startDate, filters.endDate, filters.atmId])
     
     
     return (
@@ -191,9 +191,10 @@ export const Transactions = ({  }) => {
               <div  >
                 <div style={styles.rowy}  >
                   <h4 className="font-bold text-xl">All Transactions</h4>
-                  <div >
-                    <button >Print</button>
-                    <button >Export</button>
+                  <div className="flex gap-3">
+                    <button className="!bg-white !hover:bg-gray-50 !text-gray-800 !text-lg !py-2 !px-12 !border !border-gray-400 !rounded !shadow">Print</button>
+                    <button className="!bg-white !hover:bg-gray-50 !text-gray-800 !text-lg !py-2 !px-12 !border !border-gray-400 !rounded !shadow">Export</button>
+                    
                   </div>
                 </div>
         
@@ -218,6 +219,11 @@ export const Transactions = ({  }) => {
                             isClearable={true}
                             placeholderText="Select date range"
                             className="bg-white shadow-md rounded px-4 py-3 mb-4 w-64 h-12 hover:bg-gray-50 transition-colors duration-200"
+                            showMonthYearPicker={false} 
+                            showYearDropdown 
+                            showMonthDropdown 
+                            dropdownMode="select" 
+                            maxDate={new Date()} 
                             />  
                     </div>
 
@@ -348,7 +354,12 @@ export const Transactions = ({  }) => {
                         
 
                     
-                    </table><NextPrev itemsPerPage={itemsPerPage} currentPage={currentPage} totalPages={totalPages} indexOfFirstItem={indexOfFirstItem} indexOfLastItem={indexOfLastItem} transactions={transactions} setCurrentPage={setCurrentPage} setItemsPerPage={setItemsPerPage} paginate={paginate}/>
+                    </table> {
+                        transactions.length > 0 && (
+                            <NextPrev itemsPerPage={itemsPerPage} currentPage={currentPage} totalPages={totalPages} indexOfFirstItem={indexOfFirstItem} indexOfLastItem={indexOfLastItem} transactions={transactions} setCurrentPage={setCurrentPage} setItemsPerPage={setItemsPerPage} paginate={paginate}/>
+                        ) 
+                    }
+                    
                 </div>
               </div>
             </div>

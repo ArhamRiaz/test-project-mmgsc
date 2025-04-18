@@ -4,13 +4,14 @@ export const NextPrev = ({itemsPerPage, currentPage, totalPages, transactions, s
 
             <div className="flex items-center">
                 <span className="mr-2 font-bold">Items per page:</span>
-                <select
+                <select 
                 value={itemsPerPage}
                 onChange={(e) => {
                     setItemsPerPage(Number(e.target.value));
                     setCurrentPage(1); 
                 }}
-                className="border rounded p-1"
+                className="bg-white shadow-md rounded px-4 py-3 mb-4 w-12 h-8
+                                           hover:bg-gray-50 transition-colors duration-200"
                 >
                 {[15, 50, 100].map((size) => (
                     <option key={size} value={size}>

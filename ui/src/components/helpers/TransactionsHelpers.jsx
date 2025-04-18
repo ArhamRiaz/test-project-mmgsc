@@ -47,12 +47,10 @@ export const getAtmTransacs = async (atmId, dateRange, apiUrl) => {
       );
       
       const dateResponses = await Promise.all(datePromises);
-      console.log(dateResponses)
       const transactionPromises = dateResponses
         .filter(response => response.data?.txn?.length > 0)
         .flatMap(response => 
           response.data.txn.map(async transaction => {
-            console.log(typeof(response.data.d))
             try {
               const logs = await fetchLogs(atmId, transaction.devTime);
               return {
@@ -62,7 +60,7 @@ export const getAtmTransacs = async (atmId, dateRange, apiUrl) => {
                 code: transaction.ttp.descr
               };
             } catch (error) {
-              //console.error(`Error fetching logs for transaction ${transaction.devTime}:`, error);
+
               return {
                 ...transaction,
                 description: "Error loading logs",

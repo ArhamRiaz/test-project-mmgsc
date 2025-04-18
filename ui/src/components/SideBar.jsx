@@ -11,12 +11,12 @@ export const SideBar = ({ children }) => {
   const [settings, setSettings] = useState(false)
   const location = useLocation();
 
-    const showSettings = () => setSettings(!settings);
+  const showSettings = () => setSettings(!settings);
   
   const isActive = (path) => location.pathname === path;
   return (
     <div className="flex"> 
-    <aside className='side-screen'>
+    <aside className='side-screen h-screen sticky top-0'>
         <nav className={sidebar ? "nav-menu active" : "nav-menu"}>
 
           <ul className="nav-menu-items" >
