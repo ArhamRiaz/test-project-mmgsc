@@ -327,25 +327,35 @@ export const Transactions = ({  }) => {
                     
                     
                         {isLoading ? (
-                              <tbody>
-                              <tr>
-                                <td colSpan={5} style={{ textAlign: 'center', padding: '20px' }}>
-                                  <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                    <CircularProgress />
-                                  </div>
-                                </td>
-                              </tr>
-                            </tbody>
-                        ) : (<tbody>
-                            {currentTransactions.map((txn, index) => (
-                                <tr key={`${txn.devTime}-${index}`} className="hover:bg-gray-50">
-                                <td className="px-4 py-2 border-b text-left">{txn.date}</td>
-                                <td className="px-4 py-2 border-b text-left ">{txn.atm?.txt || 'N/A'}</td>
-                                <td className="px-4 py-2 border-b text-left">{txn.pan || 'N/A'}</td>
-                                <td className="px-4 py-2 border-b text-left">{txn.description || 'N/A'}</td>
-                                <td className="px-4 py-2 border-b text-left">{txn.code || 'N/A'}</td>
+                                <tbody>
+                                <tr>
+                                  <td colSpan={6} style={{ textAlign: 'center', padding: '20px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                      <CircularProgress />
+                                    </div>
+                                  </td>
                                 </tr>
-                            ))}</tbody>
+                              </tbody>
+                            ) : (
+                              <tbody>
+                                {currentTransactions.length > 0 ? (
+                                  currentTransactions.map((txn, index) => (
+                                    <tr key={`${txn.devTime}-${index}`} className="hover:bg-gray-50">
+                                      <td className="px-4 py-2 border-b text-left">{txn.date}</td>
+                                      <td className="px-4 py-2 border-b text-left ">{txn.atm?.txt || 'N/A'}</td>
+                                      <td className="px-4 py-2 border-b text-left">{txn.pan || 'N/A'}</td>
+                                      <td className="px-4 py-2 border-b text-left">{txn.description || 'N/A'}</td>
+                                      <td className="px-4 py-2 border-b text-left">{txn.code || 'N/A'}</td>
+                                    </tr>
+                                  ))
+                                ) : (
+                                  <tr>
+                                    <td colSpan={6} className="px-4 py-6 text-center text-gray-500">
+                                      No transactions found for the selected criteria
+                                    </td>
+                                  </tr>
+                                )}
+                              </tbody>
                         )}
                         
 
