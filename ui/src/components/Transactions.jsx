@@ -223,9 +223,9 @@ export const Transactions = ({  }) => {
                     </div>
 
                     {/* ATM ID Dropdown */}
-                    <div style={styles.field}>
+                    <div style={styles.field} className="w-[15%]">
                         <label className="text-left">ATM ID</label>
-                        <select className="bg-white shadow-md rounded px-4 py-3 mb-4 w-52 h-12
+                        <select className="w-[100%] bg-white shadow-md rounded px-4 py-3 mb-4 w-52 h-12
                                            hover:bg-gray-50 transition-colors duration-200"
                             name="atmId"
                             value={filters.atmId}
@@ -241,9 +241,9 @@ export const Transactions = ({  }) => {
                     </div>
 
                     {/* Customer PAN Number */}
-                    <div style={styles.field}>
+                    <div style={styles.field} className="w-[20%]">
                         <label className="text-left">Customer PAN Number</label>
-                        <input className="bg-white shadow-md rounded text-center px-4 py-3 mb-4 w-52 h-12
+                        <input className="w-[100%] bg-white shadow-md rounded text-center px-4 py-3 mb-4 w-52 h-12
                                           hover:bg-gray-50 transition-colors duration-200"
                             placeholder={panPlace}
                             onFocus={() => setPanPlace('')}
@@ -255,9 +255,9 @@ export const Transactions = ({  }) => {
                     </div>
 
                     {/* EMV Chip AID Dropdown */}
-                    <div style={styles.field}>
+                    <div style={styles.field} className="w-[20%]">
                         <label className=" text-left">EMV Chip AID</label>
-                        <select className="bg-white shadow-md rounded px-4 py-3 mb-4 w-52 h-12
+                        <select className=" w-[100%] bg-white shadow-md rounded px-4 py-3 mb-4 w-52 h-12
                                            hover:bg-gray-50 transition-colors duration-200"
                             name="aid"
                             value={filters.aid}
@@ -273,9 +273,9 @@ export const Transactions = ({  }) => {
                     </div>
 
                     {/* Transaction Serial Number */}
-                    <div style={styles.field}>
+                    <div style={styles.field} className="w-[20%]">
                         <label className=" text-left">Transaction Serial Number</label>
-                        <input className="bg-white shadow-md rounded text-center px-4 py-3 mb-4 w-52 h-12
+                        <input className="w-[100%] bg-white shadow-md rounded text-center px-4 py-3 mb-4 w-52 h-12
                                           hover:bg-gray-50 transition-colors duration-200"
                             placeholder={serialPlace}
                             onFocus={() => setSerialPlace('')}
