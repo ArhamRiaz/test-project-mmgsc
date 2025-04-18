@@ -103,7 +103,6 @@ export const Transactions = ({  }) => {
                 if (params.atmId == "All ATMS"){
                     setisLoading(true);
                     const transactionsWithLogs = []
-                    console.log(atms)
                     for (let i of atms){
                         const dateBuffer = dateRange
                         const tLog = await getAtmTransacs(i.id, dateBuffer, apiUrl)
@@ -112,7 +111,6 @@ export const Transactions = ({  }) => {
 
                     const t2 = transactionsWithLogs.flat()
                     const t3 = t2.filter(n => n)
-                    console.log(t3)
 
                     setTransactions(t3);
                     setMasterTransactions(t3)
@@ -120,7 +118,6 @@ export const Transactions = ({  }) => {
                 } else {
                         
                   const transactionsWithLogs = await getAtmTransacs(params.atmId, dateRange, apiUrl)
-                  console.log(transactionsWithLogs)
                   setTransactions(transactionsWithLogs);
                   setMasterTransactions(transactionsWithLogs)
                 }
@@ -141,12 +138,10 @@ export const Transactions = ({  }) => {
     };
 
     const handleSearch = (term) => {
-        console.log(term.target.value);
         setSearchTerm(term.target.value);
         const filteredTransactions = mastertransactions.filter((txn) =>
         txn.description.toLowerCase().includes(searchTerm)
               );
-      console.log(filteredTransactions);
       if (filteredTransactions.length == 0){
         setTransactions(mastertransactions)
       } else {
@@ -192,8 +187,8 @@ export const Transactions = ({  }) => {
                 <div style={styles.rowy}  >
                   <h4 className="font-bold text-xl">All Transactions</h4>
                   <div className="flex gap-3">
-                    <button className="!bg-white !hover:bg-gray-50 !text-gray-800 !text-lg !py-2 !px-12 !border !border-gray-400 !rounded !shadow">Print</button>
-                    <button className="!bg-white !hover:bg-gray-50 !text-gray-800 !text-lg !py-2 !px-12 !border !border-gray-400 !rounded !shadow">Export</button>
+                    <button className="!bg-white !hover:bg-gray-50 !text-gray-800 !text-lg !py-2 !px-12 !border !border-gray-400 !rounded !shadow" onClick={() => alert("Not Implemented")}>Print</button>
+                    <button className="!bg-white !hover:bg-gray-50 !text-gray-800 !text-lg !py-2 !px-12 !border !border-gray-400 !rounded !shadow" onClick={() => alert("Not Implemented")}>Export</button>
                     
                   </div>
                 </div>
