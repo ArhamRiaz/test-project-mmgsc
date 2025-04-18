@@ -116,10 +116,11 @@ export const Transactions = ({  }) => {
                     setMasterTransactions(t3)
                     setisLoading(false)
                 } else {
-                        
+                  setisLoading(true);
                   const transactionsWithLogs = await getAtmTransacs(params.atmId, dateRange, apiUrl)
                   setTransactions(transactionsWithLogs);
                   setMasterTransactions(transactionsWithLogs)
+                  setisLoading(false);
                 }
                 
             }

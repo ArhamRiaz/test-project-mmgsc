@@ -1,13 +1,18 @@
 import axios from "axios";
 import express from "express"
 import cors from "cors"
+import serverless from "serverless-http";
 
 
 
 //const express = require("express");
 const app = express();
-const port = 8080;
-app.use(cors());
+const port = 3001;
+app.use(express.json());
+
+if (process.env.DEVELOPMENT) {
+  app.use(cors());
+}
 
 app.get("/", (req, res) => {
     res.send("Hello !");
@@ -71,10 +76,14 @@ app.post('/getTransactionListWithPost', async (req, res) => {
 
         res.send(data)
       } catch(err){
-        res.status(400).send(`Error creating album: ${err}`)
+        res.status(400).send(`Error posting: ${err}`)
       }
     });
 
-app.listen(port, () => {
-    console.log("server started on port 8080")
-})
+if (process.env.DEVELOPMENT) {
+    app.listen(port, () => {
+        console.log(`Example app listening on port ${port}`);
+    });
+    }
+
+export const handler = serverless(app);
