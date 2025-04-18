@@ -17,7 +17,10 @@ function App() {
       <SideBar>
       <Routes>
       
-      
+      <Route path="/" 
+        element={<Transactions></Transactions>}
+        />
+
       <Route path="/transactions" 
         element={<Transactions></Transactions>}
         />

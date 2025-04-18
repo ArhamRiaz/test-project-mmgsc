@@ -1,8 +1,9 @@
 import { useState, useEffect} from "react";
-import { parseLogs, getDatesInRange } from "./TransactionsHelpers";
+import { parseLogs, getDatesInRange, getAtmTransacs } from "./TransactionsHelpers";
 import axios from 'axios';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { IoIosSearch } from "react-icons/io";
 
 
 const styles = {
@@ -33,26 +34,29 @@ export const Transactions = ({  }) => {
     const [atms, setAtms] = useState([])
     const [aids, setAids] = useState([])
     const [transactions, setTransactions] = useState([]);
+    const [mastertransactions, setMasterTransactions] = useState([]);
     const [serialPlace, setSerialPlace] = useState('4 digit number')
     const [panPlace, setPanPlace] = useState('Partial or full card number')
     const [filters, setFilters] = useState({
         startDate: '',
         endDate: '',
-        atmId: 'All ATMS',
+        atmId: '',
         pan: '',
         aid: '',
         serial:''
     })
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
+    const [searchTerm, setSearchTerm] = useState("");
 
     const apiUrl = import.meta.env.VITE_API_URL;
 
     const fetchATMS = async () => {
         try {
             const {data} = await axios.get(`${apiUrl}/getAtmList`)
+            //data.unshift({name: "All ATMS", id: 567})
             setAtms(data)
-            //console.log(data);
+          
         } catch (error) {
             console.log("Error fetching ATMS: " + error)
         }
@@ -80,16 +84,7 @@ export const Transactions = ({  }) => {
         }
     }
 
-    const fetchLogs = async (atmId, datetime) => {
-        try {
 
-            const {data} = await axios.get(`${apiUrl}/getTransactionLog/${atmId}/${datetime}`)
-            return data
-            //console.log(data);
-        } catch (error) {
-            console.log("error fetching atm logs: " + error)
-        }
-    }
 
     const fetchTransactions = async () => {
 
@@ -109,28 +104,28 @@ export const Transactions = ({  }) => {
                 const dateRange = getDatesInRange(params.startDate, params.endDate);
                 
                 if (params.atmId == "All ATMS"){
-                    
-                }
-                const datePromises = dateRange.map(date => 
-                    axios.get(`${apiUrl}/getAtmPastFutureTransactions/${params.atmId}/${date}`)
-                  );
-                  
-                  const dateResponses = await Promise.all(datePromises);
-                  
-                  const transactionsWithLogs = await Promise.all(
-                    dateResponses.flatMap(response => 
-                      response.data.txn.map(async transaction => {
-                        const logs = await fetchLogs(params.atmId, transaction.devTime);
-                        return {
-                          ...transaction,
-                          description: logs,
-                          date: new Date(transaction.devTime).toLocaleDateString()
-                        };
-                      })
-                    )
-                  );
-                  
+                    const transactionsWithLogs = []
+                    console.log(atms)
+                    for (let i of atms){
+                        const dateBuffer = dateRange
+                        const tLog = await getAtmTransacs(i.id, dateBuffer, apiUrl)
+                        transactionsWithLogs.push(tLog)
+                    }
+
+                    const t2 = transactionsWithLogs.flat()
+                    const t3 = t2.filter(n => n)
+                    console.log(t3)
+
+                    setTransactions(t3);
+                    setMasterTransactions(t3)
+                } else {
+                        
+                  const transactionsWithLogs = await getAtmTransacs(params.atmId, dateRange, apiUrl)
+                  console.log(transactionsWithLogs)
                   setTransactions(transactionsWithLogs);
+                  setMasterTransactions(transactionsWithLogs)
+                }
+                
             }
         } catch (error) {
 
@@ -146,6 +141,22 @@ export const Transactions = ({  }) => {
         }));
     };
 
+    const handleSearch = (term) => {
+        console.log(term.target.value);
+        setSearchTerm(term.target.value);
+        const filteredTransactions = mastertransactions.filter((txn) =>
+        txn.description.toLowerCase().includes(searchTerm)
+              );
+      console.log(filteredTransactions);
+      if (filteredTransactions.length == 0){
+        setTransactions(mastertransactions)
+      } else {
+        setTransactions(filteredTransactions)
+      }
+      
+      };
+     
+
     useEffect(() => {
       fetchATMS();
       fetchAids();
@@ -156,6 +167,7 @@ export const Transactions = ({  }) => {
 
     useEffect(() => {
       fetchTransactions();
+      
     }, [filters])
     
     
@@ -166,7 +178,7 @@ export const Transactions = ({  }) => {
               {/* Headers */}
               <div  >
                 <div style={styles.rowy}  >
-                  <h4 >All Transactions</h4>
+                  <h4 className="font-bold text-xl">All Transactions</h4>
                   <div >
                     <button >Print</button>
                     <button >Export</button>
@@ -176,7 +188,7 @@ export const Transactions = ({  }) => {
                 <div style={styles.container}>
                     {/* Date  */}
                     <div >
-                        <p className=" text-left">Date</p>
+                        <p className="text-left">Date</p>
                         <DatePicker
                             selectsRange={true}
                             startDate={startDate}
@@ -195,26 +207,18 @@ export const Transactions = ({  }) => {
                             placeholderText="Select date range"
                             className="bg-white shadow-md rounded px-4 py-3 mb-4 w-64 h-12 hover:bg-gray-50 transition-colors duration-200"
                             />  
-                        {/* <input 
-                            type="date" 
-                            className="bg-white shadow-md rounded px-4 py-3 mb-4 w-52 h-12
-                                       hover:bg-gray-50 transition-colors duration-200" 
-                            name="startDate"
-                            value={filters.startDate}
-                            onChange={handleFilterChange}
-                        /> */}
                     </div>
 
                     {/* ATM ID Dropdown */}
                     <div style={styles.field}>
-                        <label className=" text-left">ATM ID</label>
+                        <label className="text-left">ATM ID</label>
                         <select className="bg-white shadow-md rounded px-4 py-3 mb-4 w-52 h-12
                                            hover:bg-gray-50 transition-colors duration-200"
                             name="atmId"
                             value={filters.atmId}
                             onChange={handleFilterChange}
                         >
-                            <option value="">All ATMS</option>
+                            <option value="All ATMS">All ATMS</option>
                             {atms.map((item) => (
                                 <option key={item.id} value={item.id}>
                                     {item.name}
@@ -225,7 +229,7 @@ export const Transactions = ({  }) => {
 
                     {/* Customer PAN Number */}
                     <div style={styles.field}>
-                        <label className=" text-left">Customer PAN Number</label>
+                        <label className="text-left">Customer PAN Number</label>
                         <input className="bg-white shadow-md rounded text-center px-4 py-3 mb-4 w-52 h-12
                                           hover:bg-gray-50 transition-colors duration-200"
                             placeholder={panPlace}
@@ -276,13 +280,32 @@ export const Transactions = ({  }) => {
                 {/* Transaction Table */}
                 <div className="overflow-auto bg-white rounded shadow">
                     <table className="my-table">
-                    <thead className="bg-gray-100 text-left font-semibold">
+                    <thead className="bg-gray-100 text-left font-semibold ">
                         <tr>
-                        <th className="px-4 py-3 border-b">Date</th>
-                        <th className="px-4 py-3 border-b">ATM ID</th>
-                        <th className="px-4 py-3 border-b">Customer PAN</th>
-                        <th className="px-4 py-3 border-b">Description</th>
-                        <th className="px-4 py-3 border-b">Code</th>
+                        <th className="w-[10%] px-4 py-3 border-b">Date</th>
+                        <th className="w-[10%] px-4 py-3 border-b">ATM ID</th>
+                        <th className="w-[25%]px-4 py-3 border-b">Customer PAN</th>
+                        <th className="w-[40%] px-4 py-3 border-b">Description</th>
+                        <th className="w-[15%] px-4 py-3 border-b">Code</th>
+                        <th className="border-b p-0" colSpan={0}>
+                            <div className="flex items-center justify-end px-4 py-2">
+                                <div className="relative">
+                                    <input 
+                                    type="text"
+                                    placeholder="Search in results"
+                                    className="bg-white shadow-md rounded text-center px-4 py-3 mb-4 w-52 h-8
+                                                hover:bg-gray-50 transition-colors duration-200"
+                                    onChange={handleSearch}
+                                    />
+                                    <div class="absolute inset-y-0 left-0 pl-3 
+                                        flex items-center 
+                                        pointer-events-none">
+                                        <IoIosSearch  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-4000 h-5 w-5"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </th>
+                        
                         
                         </tr>
                         
@@ -291,11 +314,11 @@ export const Transactions = ({  }) => {
                     <tbody>
                     {transactions.map((txn, index) => (
                         <tr key={`${txn.devTime}-${index}`} className="hover:bg-gray-50">
-                        <td className="px-4 py-2 border-b">{txn.date}</td>
-                        <td className="px-4 py-2 border-b">{txn.atm?.txt || 'N/A'}</td>
-                        <td className="px-4 py-2 border-b">{txn.pan || 'N/A'}</td>
-                        <td className="px-4 py-2 border-b">{txn.description || 'N/A'}</td>
-                        <td className="px-4 py-2 border-b">{txn.code || 'N/A'}</td>
+                        <td className="px-4 py-2 border-b text-left">{txn.date}</td>
+                        <td className="px-4 py-2 border-b text-left ">{txn.atm?.txt || 'N/A'}</td>
+                        <td className="px-4 py-2 border-b text-left">{txn.pan || 'N/A'}</td>
+                        <td className="px-4 py-2 border-b text-left">{txn.description || 'N/A'}</td>
+                        <td className="px-4 py-2 border-b text-left">{txn.code || 'N/A'}</td>
                         </tr>
                     ))}
                     </tbody>

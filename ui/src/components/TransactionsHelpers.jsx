@@ -1,50 +1,11 @@
-export const parseLogs = (logs) => {
-    const transactions = [];
-    const lines = logs.split('\n');
-    let i = 0;
-    
-    while (i < lines.length) {
-      const line = lines[i++];
-      
-      if (line.includes('TRANSACTION START')) {
-        const transaction = {
-          date: '',
-          atmId: '',
-          description: [],
-          code: ''
-        };
-        
-        // Process until TRANSACTION END
-        while (i < lines.length && !lines[i].includes('TRANSACTION END')) {
-          const currentLine = lines[i++];
-          
-          // Extract timestamp (code)
-          const timeMatch = currentLine.match(/\[(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2})\]/);
-          if (timeMatch) transaction.code = timeMatch[1];
-          
+import axios from 'axios';
 
-          
-          // Description events
-          if (currentLine.includes('PIN ENTERED')) {
-            transaction.description.push('PIN Verified, host approved');
-          } 
-          else if (currentLine.includes('WITHDRAWAL')) {
-            const amountMatch = currentLine.match(/AMOUNT: (\d+\.\d{2})/);
-            transaction.description.push(amountMatch ? `Withdrawal $${amountMatch[1]}` : 'Withdrawal');
-          }
-          
-        }
-        
-        // Format final transaction
-        if (transaction.pan) {
-          transaction.date = new Date(transaction.code).toLocaleDateString();
-          transaction.description = transaction.description.join('\n');
-          transactions.push(transaction);
-        }
-      }
-    }
-    
-    return transactions;
+
+export const parseLogs = (logs) => {
+
+    const lines = logs.split('\n');
+
+    return lines[0];
   };
 
   export const getDatesInRange = (startDate, endDate) => {
@@ -64,4 +25,59 @@ export const parseLogs = (logs) => {
     }
     
     return dates;
+  };
+
+  export const fetchLogs = async (atmId, datetime) => {
+    const apiUrl = import.meta.env.VITE_API_URL;
+    try {
+
+        const {data} = await axios.get(`${apiUrl}/getTransactionLog/${atmId}/${datetime}`)
+        return data
+
+    } catch (error) {
+        console.log("error fetching atm logs: " + error)
+    }
+}
+
+export const getAtmTransacs = async (atmId, dateRange, apiUrl) => {
+    try {
+
+      const datePromises = dateRange.map(date => 
+        axios.get(`${apiUrl}/getAtmPastFutureTransactions/${atmId}/${date}`)
+      );
+      
+      const dateResponses = await Promise.all(datePromises);
+      console.log(dateResponses)
+      const transactionPromises = dateResponses
+        .filter(response => response.data?.txn?.length > 0)
+        .flatMap(response => 
+          response.data.txn.map(async transaction => {
+            console.log(typeof(response.data.d))
+            try {
+              const logs = await fetchLogs(atmId, transaction.devTime);
+              return {
+                ...transaction,
+                description: typeof logs === 'object' ? JSON.stringify(parseLogs(logs)) : parseLogs(logs),
+                date: new Date(response.data.d).toLocaleDateString(),
+                code: transaction.ttp.descr
+              };
+            } catch (error) {
+              //console.error(`Error fetching logs for transaction ${transaction.devTime}:`, error);
+              return {
+                ...transaction,
+                description: "Error loading logs",
+                date: new Date(response.data.d).toLocaleDateString()
+              };
+            }
+          })
+        );
+  
+
+      const transactionsWithLogs = await Promise.all(transactionPromises);
+      return transactionsWithLogs.filter(t => t); 
+  
+    } catch (error) {
+      console.error("Error in getAtmTransacs:", error);
+      return []; 
+    }
   };

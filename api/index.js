@@ -37,7 +37,6 @@ app.get("/getHostResponseList", async (req, res) => {
 app.get("/getTransactionLog/:atmid/:devtime", async (req, res) => {
     const atmid = req.params.atmid
     const devtime = req.params.devtime
-    console.log("hereeee");
     const response = await fetch(
         `https://dev.smartjournal.net:443/um/test/api/jr/txn/log/v1?a=${atmid}&t=${devtime}`);
     
@@ -59,6 +58,7 @@ app.get("/getAtmPastFutureTransactions/:atmid/:datetime", async (req, res) => {
     const response = await fetch(
         `https://dev.smartjournal.net:443/um/test/api/jr/txn/txnlist/${atmid}/${datetime}/v1`);
     const data = await response.json()
+    data.d = parseInt(datetime);
     res.send(data)
 })
 

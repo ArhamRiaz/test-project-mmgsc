@@ -21,13 +21,13 @@ export const SideBar = ({ children }) => {
           <ul className="nav-menu-items" >
                 <li  className={`nav-text ${isActive("/transactions") ? "active" : ""}`} >
                   <Link to="/transactions">
-                    <p>{"Transactions"}</p>
+                    <p className="font-bold">{"Transactions"}</p>
                   </Link>
                 </li>
 
                 <li className={"nav-text"} onClick={showSettings}>
                     <div>
-                        <p>{"Settings"}</p>
+                        <p className="font-bold">{"Settings"}</p>
                     </div>
                 </li>
 
