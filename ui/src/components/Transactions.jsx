@@ -4,6 +4,7 @@ import axios from 'axios';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { IoIosSearch } from "react-icons/io";
+import CircularProgress from '@mui/material/CircularProgress';
 
 
 const styles = {
@@ -37,6 +38,7 @@ export const Transactions = ({  }) => {
     const [mastertransactions, setMasterTransactions] = useState([]);
     const [serialPlace, setSerialPlace] = useState('4 digit number')
     const [panPlace, setPanPlace] = useState('Partial or full card number')
+    const [isLoading, setisLoading] = useState(false)
     const [filters, setFilters] = useState({
         startDate: '',
         endDate: '',
@@ -54,7 +56,6 @@ export const Transactions = ({  }) => {
     const fetchATMS = async () => {
         try {
             const {data} = await axios.get(`${apiUrl}/getAtmList`)
-            //data.unshift({name: "All ATMS", id: 567})
             setAtms(data)
           
         } catch (error) {
@@ -66,25 +67,10 @@ export const Transactions = ({  }) => {
         try {
             const {data} = await axios.get(`${apiUrl}/getAidList`)
             setAids(data)
-            //console.log(data);
         } catch (error) {
             console.log("Error fetching Aids: " + error)
         }
     }
-
-    const fetchAtmTransacs = async () => {
-        try {
-
-            const data = await axios.get(`${apiUrl}/getAtmPastFutureTransactions/${38}/${1681851159000}`)
-            
-            console.log( data.data.txn);
-            console.log(data)
-        } catch (error) {
-            console.log("error fetching atm transactions: " + error)
-        }
-    }
-
-
 
     const fetchTransactions = async () => {
 
@@ -104,6 +90,7 @@ export const Transactions = ({  }) => {
                 const dateRange = getDatesInRange(params.startDate, params.endDate);
                 
                 if (params.atmId == "All ATMS"){
+                    setisLoading(true);
                     const transactionsWithLogs = []
                     console.log(atms)
                     for (let i of atms){
@@ -118,6 +105,7 @@ export const Transactions = ({  }) => {
 
                     setTransactions(t3);
                     setMasterTransactions(t3)
+                    setisLoading(false)
                 } else {
                         
                   const transactionsWithLogs = await getAtmTransacs(params.atmId, dateRange, apiUrl)
@@ -155,14 +143,27 @@ export const Transactions = ({  }) => {
       }
       
       };
+
+      const handlePan = (term) => {
+        const searchValue = term.target.value;
+        
+        setFilters(prev => ({
+          ...prev,
+          pan: searchValue
+        }));
+      
+        const filteredPAN = mastertransactions.filter((txn) => {
+          const panValue = txn.pan?.toLowerCase() || '';
+          return panValue.includes(searchValue.toLowerCase());
+        });
+      
+        setTransactions(filteredPAN.length === 0 ? mastertransactions : filteredPAN);
+      };
      
 
     useEffect(() => {
       fetchATMS();
       fetchAids();
-      fetchAtmTransacs();
-      //fetchLogs();
-    
     }, [])
 
     useEffect(() => {
@@ -237,7 +238,7 @@ export const Transactions = ({  }) => {
                             onBlur={() => setPanPlace('Partial or full card number')}
                             name="pan"
                             value={filters.pan}
-                            onChange={handleFilterChange}
+                            onChange={handlePan}
                         />
                     </div>
 
@@ -270,7 +271,7 @@ export const Transactions = ({  }) => {
                             maxLength={4} 
                             name="serialNumber"
                             value={filters.serialNumber}
-                            onChange={handleFilterChange}
+                            
                         />
                     </div>
                     
@@ -297,7 +298,7 @@ export const Transactions = ({  }) => {
                                                 hover:bg-gray-50 transition-colors duration-200"
                                     onChange={handleSearch}
                                     />
-                                    <div class="absolute inset-y-0 left-0 pl-3 
+                                    <div className="absolute inset-y-0 left-0 pl-3 
                                         flex items-center 
                                         pointer-events-none">
                                         <IoIosSearch  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-4000 h-5 w-5"/>
@@ -311,17 +312,30 @@ export const Transactions = ({  }) => {
                         
                     </thead>
                     
-                    <tbody>
-                    {transactions.map((txn, index) => (
-                        <tr key={`${txn.devTime}-${index}`} className="hover:bg-gray-50">
-                        <td className="px-4 py-2 border-b text-left">{txn.date}</td>
-                        <td className="px-4 py-2 border-b text-left ">{txn.atm?.txt || 'N/A'}</td>
-                        <td className="px-4 py-2 border-b text-left">{txn.pan || 'N/A'}</td>
-                        <td className="px-4 py-2 border-b text-left">{txn.description || 'N/A'}</td>
-                        <td className="px-4 py-2 border-b text-left">{txn.code || 'N/A'}</td>
-                        </tr>
-                    ))}
-                    </tbody>
+                    
+                        {isLoading ? (
+                              <tbody>
+                              <tr>
+                                <td colSpan={5} style={{ textAlign: 'center', padding: '20px' }}>
+                                  <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                    <CircularProgress />
+                                  </div>
+                                </td>
+                              </tr>
+                            </tbody>
+                        ) : (<tbody>
+                            {transactions.map((txn, index) => (
+                                <tr key={`${txn.devTime}-${index}`} className="hover:bg-gray-50">
+                                <td className="px-4 py-2 border-b text-left">{txn.date}</td>
+                                <td className="px-4 py-2 border-b text-left ">{txn.atm?.txt || 'N/A'}</td>
+                                <td className="px-4 py-2 border-b text-left">{txn.pan || 'N/A'}</td>
+                                <td className="px-4 py-2 border-b text-left">{txn.description || 'N/A'}</td>
+                                <td className="px-4 py-2 border-b text-left">{txn.code || 'N/A'}</td>
+                                </tr>
+                            ))}</tbody>
+                        )}
+
+                    
                     </table>
                 </div>
               </div>
