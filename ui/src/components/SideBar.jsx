@@ -51,8 +51,8 @@ export const SideBar = ({ children }) => {
         <div 
             className="main-content" 
             style={{
-            marginLeft: sidebar ? '250px' : '0', 
-            width: sidebar ? 'calc(100% - 250px)' : '100%',
+            marginLeft: sidebar ? '200px' : '0', 
+            width: sidebar ? 'calc(100% - 200px)' : '100%',
             padding: '1rem',
             transition: 'margin-left 0.45s ease' 
             }}
