@@ -3,7 +3,7 @@ export const NextPrev = ({itemsPerPage, currentPage, totalPages, transactions, s
         <div className="flex items-center justify-between mt-4">
 
             <div className="flex items-center">
-                <span className="mr-2 font-bold">Items per page:</span>
+                <span className="mr-2 ">Items per page:</span>
                 <select 
                 value={itemsPerPage}
                 onChange={(e) => {
@@ -25,7 +25,7 @@ export const NextPrev = ({itemsPerPage, currentPage, totalPages, transactions, s
                 <button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="!bg-gray-300 !hover:bg-gray-400 !text-gray-800 !font-bold !py-2 !px-4"
+                className="!border-none !hover:bg-gray-500 !text-gray-800  !py-2 !px-4"
                 >
                 Previous
                 </button>
@@ -58,13 +58,13 @@ export const NextPrev = ({itemsPerPage, currentPage, totalPages, transactions, s
                 <button
                 onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className="!bg-gray-300 !hover:bg-gray-400 !text-gray-800 !font-bold !py-2 !px-4"
+                className=" !hover:bg-gray-500 !border-none !text-gray-800  !py-2 !px-4"
                 >
                 Next
                 </button>
             </div>
                 <div>
-                    <p className="font-bold">Returned {transactions.length} Items </p>
+                    <p className="">Returned {transactions.length} Items  </p>
                 </div>
     </div>
         )

@@ -256,7 +256,7 @@ export const Transactions = ({  }) => {
                     </div>
 
                     {/* EMV Chip AID Dropdown */}
-                    <div style={styles.field} className="w-[20%]">
+                    <div style={styles.field} className="w-[15%]">
                         <label className=" text-left">EMV Chip AID</label>
                         <select className=" w-[100%] bg-white shadow-md rounded px-4 py-3 mb-4 w-52 h-12
                                            hover:bg-gray-50 transition-colors duration-200"
@@ -274,7 +274,7 @@ export const Transactions = ({  }) => {
                     </div>
 
                     {/* Transaction Serial Number */}
-                    <div style={styles.field} className="w-[20%]">
+                    <div style={styles.field} className="w-[15%]">
                         <label className=" text-left">Transaction Serial Number</label>
                         <input className="w-[100%] bg-white shadow-md rounded text-center px-4 py-3 mb-4 w-52 h-12
                                           hover:bg-gray-50 transition-colors duration-200"
